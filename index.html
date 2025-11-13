@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Patient Weight Loss Calculator</title>
+  <style>
+    :root {
+      --bg: #0f172a; /* slate-900 */
+      --card: #111827; /* gray-900 */
+      --muted: #94a3b8; /* slate-400 */
+      --text: #e5e7eb; /* gray-200 */
+      --accent: #22c55e; /* green-500 */
+      --warn: #f59e0b; /* amber-500 */
+      --danger: #ef4444; /* red-500 */
+      --border: #1f2937; /* gray-800 */
+    }
+    html, body { height: 100%; }
+    body {
+      margin: 0; font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue, Arial, "Apple Color Emoji", "Segoe UI Emoji";
+      background: linear-gradient(180deg, #0b1020, #0f172a 30%);
+      color: var(--text);
+      display: grid; place-items: start center;
+    }
+    .container {
+      width: min(900px, 92vw);
+      margin: 5vh auto 8vh;
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.02));
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      box-shadow: 0 10px 30px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05);
+      overflow: hidden;
+    }
+    header { padding: 20px 24px; border-bottom: 1px solid var(--border); background: rgba(17,24,39,.6); backdrop-filter: blur(4px); }
+    header h1 { margin: 0; font-size: 1.25rem; letter-spacing: .3px; }
+    header p { margin: 6px 0 0; color: var(--muted); font-size: .9rem; }
+
+    form { display: grid; gap: 18px; padding: 20px 24px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .field { display: grid; gap: 8px; }
+    .weight-row { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    label { font-size: .9rem; color: var(--muted); }
+    input[type="number"] { -moz-appearance: textfield; }
+    input[type="date"], input[type="text"], select {
+    input[type="number"] { -moz-appearance: textfield;, input[type="date"], input[type="text"], select {
+      background: #0b1222; color: var(--text);
+      border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; font-size: 1rem;
+      outline: none; transition: border-color .2s ease, box-shadow .2s ease;
+    }
+    input:focus, select:focus { border-color: #334155; box-shadow: 0 0 0 4px rgba(51,65,85,.35); }
+
+    .row-span-2 { grid-row: span 2; }
+
+    .actions { display: flex; gap: 12px; padding: 0 24px 20px; flex-wrap: wrap; }
+    button {
+      border: 1px solid var(--border); background: #101827; color: var(--text);
+      padding: 12px 16px; border-radius: 12px; cursor: pointer; font-weight: 600; letter-spacing: .2px;
+      transition: transform .02s ease, background .2s ease, border-color .2s ease;
+    }
+    button.primary { background: #1e293b; border-color: #334155; }
+    button:hover { background: #172033; }
+    button:active { transform: translateY(1px); }
+
+    .results { padding: 20px 24px; border-top: 1px solid var(--border); display: grid; gap: 14px; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 14px; }
+    .card { background: #0b1222; border: 1px solid var(--border); border-radius: 16px; padding: 16px; }
+    .metric { font-size: 1.6rem; font-weight: 800; }
+    .sub { color: var(--muted); font-size: .9rem; margin-top: 4px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 999px; font-size: .8rem; font-weight: 700; letter-spacing: .2px; }
+    .pos { background: rgba(34,197,94,.1); color: #86efac; border: 1px solid rgba(34,197,94,.4); }
+    .neg { background: rgba(239,68,68,.1); color: #fecaca; border: 1px solid rgba(239,68,68,.4); }
+
+    .note { color: var(--muted); font-size: .85rem; }
+    .error { color: #fecaca; }
+    details { margin: 0 24px 20px; }
+    details > summary { cursor: pointer; color: var(--muted); }
+    .foot { padding: 6px 24px 20px; color: var(--muted); font-size: .8rem; }
+  </style>
+</head>
+<body>
+  <div class="container" role="application" aria-label="Patient Weight Loss Calculator">
+    <header>
+      <h1>Patient Weight Loss Calculator</h1>
+      <p>Enter weights in kilograms and the date of the last visit. The tool will compute <em>average weekly change</em> since the last visit, <em>total body weight loss (TBWL%)</em> from the starting weight, and—if provided—<em>TBWL% from a pre‑operative starting weight</em>.</p>
+    </header>
+
+    <form id="calc-form" onsubmit="event.preventDefault(); calculate();">
+
+      <div class="field">
+        <label for="preopWeight">Pre‑operative starting weight (optional)</label>
+        <div class="weight-row">
+          <input id="preopWeight" name="preopWeight" type="number" step="0.1" min="0" inputmode="decimal" />
+          <select id="preopUnit" name="preopUnit">
+            <option value="kg" selected>kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="startWeight">Program starting weight</label>
+        <div class="weight-row">
+          <input id="startWeight" name="startWeight" type="number" step="0.1" min="0" inputmode="decimal" required />
+          <select id="startUnit" name="startUnit">
+            <option value="kg" selected>kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="aomWeight">AOM starting weight (optional)</label>
+        <div class="weight-row">
+          <input id="aomWeight" name="aomWeight" type="number" step="0.1" min="0" inputmode="decimal" />
+          <select id="aomUnit" name="aomUnit">
+            <option value="kg" selected>kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lastWeight">Last visit weight</label>
+        <div class="weight-row">
+          <input id="lastWeight" name="lastWeight" type="number" step="0.1" min="0" inputmode="decimal" required />
+          <select id="lastUnit" name="lastUnit">
+            <option value="kg" selected>kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="currentWeight">Current weight</label>
+        <div class="weight-row">
+          <input id="currentWeight" name="currentWeight" type="number" step="0.1" min="0" inputmode="decimal" required />
+          <select id="currentUnit" name="currentUnit">
+            <option value="kg" selected>kg</option>
+            <option value="lb">lb</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="lastVisitDate">Date of last visit (MM/DD/YY)</label>
+        <input id="lastVisitDate" name="lastVisitDate" type="text" inputmode="numeric" placeholder="MM/DD/YY" required />
+      </div>
+
+      <div class="field">
+        <label for="asOfDate">As of (defaults to today)</label>
+        <input id="asOfDate" name="asOfDate" type="date" />
+      </div>
+
+      
+
+      
+    </form>
+
+    <div class="actions">
+      <button class="primary" onclick="calculate()">Calculate</button>
+      <button onclick="resetForm()">Reset</button>
+    </div>
+
+    <section class="results" id="results" aria-live="polite">
+      <div id="message" class="note">Fill out the fields and click <strong>Calculate</strong>.</div>
+      <div class="cards" id="cards" hidden>
+        <div class="card">
+          <div class="sub" id="sinceSummary"></div>
+        </div>
+      </div>
+    </section>
+
+    
+
+    
+  </div>
+
+  <script>
+  function fmt(num, places) {
+    if (!isFinite(num)) return "—";
+    return Number(num).toFixed(places);
+  }
+
+  // STRICT date parser for MM/DD/YY
+  function parseDate(d) {
+    if (!d) return null;
+    if (d.includes('/')) {
+      const parts = d.split('/');
+      if (parts.length !== 3) return null;
+      let [mm, dd, yy] = parts.map(x => x.trim());
+      if (!mm || !dd || !yy) return null;
+      const month = +mm, day = +dd, y = +yy;
+      let year = y;
+      year += (yy.length === 2 ? (y >= 50 ? 1900 : 2000) : 0);
+      const dt = new Date(year, month - 1, day);
+      if (dt.getMonth() !== month - 1 || dt.getDate() !== day) return null;
+      return dt;
+    }
+    const t = new Date(d);
+    return isNaN(t.getTime()) ? null : t;
+  }
+
+  function weeksBetween(d1, d2) {
+    return (d2 - d1) / (1000*60*60*24*7);
+  }
+
+  function getWeightKg(id, unitId) {
+    const val = document.getElementById(id).valueAsNumber;
+    const unit = document.getElementById(unitId).value;
+    if (!(val > 0)) return NaN;
+    return unit === 'lb' ? val * 0.45359237 : val;
+  }
+
+  function calculate() {
+    const p = 1;
+    const startW   = getWeightKg('startWeight','startUnit');
+    const lastW    = getWeightKg('lastWeight','lastUnit');
+    const currentW = getWeightKg('currentWeight','currentUnit');
+    const lastDate = document.getElementById('lastVisitDate').value;
+    const asOfStr  = document.getElementById('asOfDate').value;
+
+    const msg = document.getElementById('message');
+    const cards = document.getElementById('cards');
+
+    if ([startW,lastW,currentW].some(v => !(v>0))) {
+      msg.innerHTML = '<span class="error">Please enter valid weights.</span>';
+      cards.hidden = true; return;
+    }
+    if (!lastDate) {
+      msg.innerHTML = '<span class="error">Please enter last visit date.</span>';
+      cards.hidden = true; return;
+    }
+
+    const lastVisit = parseDate(lastDate);
+    const asOf = asOfStr ? parseDate(asOfStr) : new Date();
+    if (!lastVisit || !asOf) {
+      msg.innerHTML = '<span class="error">Invalid date.</span>';
+      cards.hidden = true; return;
+    }
+    if (asOf < lastVisit) {
+      msg.innerHTML = '<span class="error">As-of date before last visit.</span>';
+      cards.hidden = true; return;
+    }
+
+    const weeks = weeksBetween(lastVisit, asOf);
+    if (weeks === 0) {
+      msg.innerHTML = '<span class="error">Dates are the same day.</span>';
+      cards.hidden = true; return;
+    }
+
+    // calculations
+    const changeKg = currentW - lastW;
+    const avgKg = changeKg / weeks;
+    const changeLb = changeKg * 2.20462;
+    const avgLb = avgKg * 2.20462;
+    const tbwlPct = ((startW - currentW) / startW) * 100;
+
+    document.getElementById('sinceSummary').textContent =
+      `${fmt(Math.abs(changeKg),1)}kg/`+
+      `${fmt(Math.abs(changeLb),1)}lbs/`+
+      `TBW ${fmt(tbwlPct,1)}%/`+
+      `average wt lost since last visit ${fmt(-avgLb,1)}lbs/wk`;
+
+    cards.hidden = false;
+    msg.textContent = '';
+  }
+
+  function resetForm() {
+    document.getElementById('calc-form').reset();
+    document.getElementById('cards').hidden = true;
+    document.getElementById('message').textContent = 'Fill out the fields and click Calculate.';
+    document.getElementById('asOfDate').value = '';
+  }
+
+  (function init(){
+    const t=new Date();
+    const yyyy=t.getFullYear();
+    const mm=String(t.getMonth()+1).padStart(2,'0');
+    const dd=String(t.getDate()).padStart(2,'0');
+    document.getElementById('asOfDate').value = `${yyyy}-${mm}-${dd}`;
+  })();
+</script>
+</body>
+</html>
