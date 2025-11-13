@@ -86,7 +86,7 @@
     <form id="calc-form" onsubmit="event.preventDefault(); calculate();">
 
       <div class="field">
-        <label for="preopWeight">Pre‑operative starting weight (optional)</label>
+        <label for="preopWeight">Pre‑operative starting weight (if applicable)</label>
         <div class="weight-row">
           <input id="preopWeight" name="preopWeight" type="number" step="0.1" min="0" inputmode="decimal" />
           <select id="preopUnit" name="preopUnit">
@@ -108,7 +108,7 @@
       </div>
 
       <div class="field">
-        <label for="aomWeight">AOM starting weight (optional)</label>
+        <label for="aomWeight">AOM starting weight (if different than program starting weight)</label>
         <div class="weight-row">
           <input id="aomWeight" name="aomWeight" type="number" step="0.1" min="0" inputmode="decimal" />
           <select id="aomUnit" name="aomUnit">
