@@ -146,6 +146,9 @@
         <div class="card">
           <div class="sub" id="sinceSummary"></div>
         </div>
+        <div class="card" id="detailsCard" hidden>
+          <div class="sub" id="detailsSummary"></div>
+        </div>
       </div>
     </section>
 
@@ -272,6 +275,24 @@
 
     document.getElementById('sinceSummary').textContent = summary;
 
+    // Build detailed calculations
+    const totalLostKg = aomOrStartW - currentW;
+    const totalLostLb = totalLostKg * 2.20462;
+    const surgeryLostKg = (preopW > 0) ? (preopW - currentW) : null;
+    const surgeryLostLb = (surgeryLostKg !== null) ? surgeryLostKg * 2.20462 : null;
+
+    let details = `Weight lost since last visit: ${fmt(Math.abs(changeKg),1)}kg (${fmt(Math.abs(changeLb),1)}lbs)<br>`;
+    if (hasDate) {
+      details += `Average weight loss per week since last visit: ${fmt(-avgLb,1)}lbs/wk<br>`;
+    }
+    details += `Total body weight lost: ${fmt(totalLostKg,1)}kg (${fmt(totalLostLb,1)}lbs)`;
+    if (surgeryLostKg !== null) {
+      details += `<br>Total body weight lost since surgery: ${fmt(surgeryLostKg,1)}kg (${fmt(surgeryLostLb,1)}lbs)`;
+    }
+
+    document.getElementById('detailsSummary').innerHTML = details;
+    document.getElementById('detailsCard').hidden = false;
+
     cards.hidden = false;
     msg.textContent = '';
   }
@@ -279,6 +300,7 @@
   function resetForm() {
     document.getElementById('calc-form').reset();
     document.getElementById('cards').hidden = true;
+    document.getElementById('detailsCard').hidden = true;
     document.getElementById('message').textContent = 'Fill out the fields and click Calculate.';
     document.getElementById('asOfDate').value = '';
   }
