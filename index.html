@@ -329,7 +329,12 @@
     document.getElementById('cards').hidden = true;
     document.getElementById('detailsCard').hidden = true;
     document.getElementById('message').textContent = 'Fill out the fields and click Calculate.';
-    document.getElementById('asOfDate').value = '';
+    // Reset "as of" date to today
+    const t=new Date();
+    const yy=String(t.getFullYear()).substring(2);
+    const mm=String(t.getMonth()+1).padStart(2,'0');
+    const dd=String(t.getDate()).padStart(2,'0');
+    document.getElementById('asOfDate').value = `${mm}${dd}${yy}`;
   }
 
   (function init(){
