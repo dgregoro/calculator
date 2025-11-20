@@ -260,9 +260,11 @@
       hasDate = true;
     }
 
-    // build output string
-    let summary = `${fmt(Math.abs(changeKg),1)}kg/`+
-                  `${fmt(Math.abs(changeLb),1)}lbs/`
+    // build output string (weight loss = -change, so loss is positive, gain is negative)
+    const weightLossKgSummary = -changeKg;
+    const weightLossLbSummary = -changeLb;
+    let summary = `${fmt(weightLossKgSummary,1)}kg/`+
+                  `${fmt(weightLossLbSummary,1)}lbs/`
     if (preopTbwlPct !== null) {
       summary += `TBW ${fmt(tbwlPctSinceAOM,1)}% since starting AOM`;
       summary += `/TBW ${fmt(preopTbwlPct,1)}% since surgery`;
@@ -281,7 +283,9 @@
     const surgeryLostKg = (preopW > 0) ? (preopW - currentW) : null;
     const surgeryLostLb = (surgeryLostKg !== null) ? surgeryLostKg * 2.20462 : null;
 
-    let details = `Weight lost since last visit: ${fmt(Math.abs(changeKg),1)}kg (${fmt(Math.abs(changeLb),1)}lbs)<br>`;
+    const weightLossKg = -changeKg; // Negative of change (loss is positive, gain is negative)
+    const weightLossLb = -changeLb;
+    let details = `Weight lost since last visit: ${fmt(weightLossKg,1)}kg (${fmt(weightLossLb,1)}lbs)<br>`;
     if (hasDate) {
       details += `Average weight loss per week since last visit: ${fmt(-avgLb,1)}lbs/wk<br>`;
     }
