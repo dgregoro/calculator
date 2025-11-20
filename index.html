@@ -99,6 +99,11 @@
       </div>
 
       <div class="field">
+        <label for="lastVisitDate">Date of last visit (MMDDYY) - optional</label>
+        <input id="lastVisitDate" name="lastVisitDate" type="text" inputmode="numeric" placeholder="MMDDYY" maxlength="6" />
+      </div>
+
+      <div class="field">
         <label for="lastWeight">Last visit weight</label>
         <div class="weight-row">
           <input id="lastWeight" name="lastWeight" type="number" step="0.1" min="0" inputmode="decimal" required />
@@ -118,11 +123,6 @@
             <option value="lb">lb</option>
           </select>
         </div>
-      </div>
-
-      <div class="field">
-        <label for="lastVisitDate">Date of last visit (MMDDYY) - optional</label>
-        <input id="lastVisitDate" name="lastVisitDate" type="text" inputmode="numeric" placeholder="MMDDYY" maxlength="6" />
       </div>
 
       <div class="field">
@@ -275,10 +275,10 @@
     }
     
     if (preopTbwlPct !== null) {
-      summary += `TBW ${fmt(tbwlPctSinceAOM,1)}% since starting AOM`;
-      summary += `/TBW ${fmt(preopTbwlPct,1)}% since surgery`;
+      summary += `TBWL ${fmt(tbwlPctSinceAOM,1)}% since starting AOM`;
+      summary += `/TBWL ${fmt(preopTbwlPct,1)}% since surgery`;
     } else {
-      summary += `TBW ${fmt(tbwlPctSinceAOM,1)}%`;
+      summary += `TBWL ${fmt(tbwlPctSinceAOM,1)}%`;
     }
     
     if (hasDate) {
