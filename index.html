@@ -6,8 +6,8 @@
   <title>Patient Weight Loss Calculator</title>
   <style>
     :root {
-      --muted: #64748b; /* slate-500 */
-      --text: #1e293b; /* slate-800 */
+      --muted: #000000; /* black */
+      --text: #000000; /* black */
       --border: #cbd5e1; /* slate-300 */
     }
     html, body { height: 100%; }
@@ -53,7 +53,7 @@
     .sub { color: var(--muted); font-size: .9rem; margin-top: 4px; padding: 12px 16px; overflow-wrap: break-word; word-wrap: break-word; white-space: normal; width: 100%; box-sizing: border-box; }
 
     .note { color: var(--muted); font-size: .85rem; }
-    .error { color: #dc2626; }
+    .error { color: #000000; }
     .version { position: fixed; bottom: 8px; right: 12px; color: var(--muted); font-size: .7rem; opacity: 0.5; }
   </style>
 </head>
@@ -263,16 +263,30 @@
     // build output string (weight loss = -change, so loss is positive, gain is negative)
     const weightLossKgSummary = -changeKg;
     const weightLossLbSummary = -changeLb;
-    let summary = `${fmt(weightLossKgSummary,1)}kg/`+
-                  `${fmt(weightLossLbSummary,1)}lbs/`
+    const isGain = weightLossKgSummary < 0;
+    
+    let summary = '';
+    if (isGain) {
+      summary = `gain of ${fmt(Math.abs(weightLossKgSummary),1)}kg/`+
+                `${fmt(Math.abs(weightLossLbSummary),1)}lbs/`;
+    } else {
+      summary = `${fmt(weightLossKgSummary,1)}kg/`+
+                `${fmt(weightLossLbSummary,1)}lbs/`;
+    }
+    
     if (preopTbwlPct !== null) {
       summary += `TBW ${fmt(tbwlPctSinceAOM,1)}% since starting AOM`;
       summary += `/TBW ${fmt(preopTbwlPct,1)}% since surgery`;
     } else {
       summary += `TBW ${fmt(tbwlPctSinceAOM,1)}%`;
     }
+    
     if (hasDate) {
-      summary += `/average wt lost since last visit ${fmt(-avgLb,1)}lbs/wk`;
+      if (isGain) {
+        summary += `/average gain since last visit ${fmt(Math.abs(avgLb),1)}lbs/wk`;
+      } else {
+        summary += `/average wt lost since last visit ${fmt(-avgLb,1)}lbs/wk`;
+      }
     }
 
     document.getElementById('sinceSummary').textContent = summary;
@@ -285,9 +299,18 @@
 
     const weightLossKg = -changeKg; // Negative of change (loss is positive, gain is negative)
     const weightLossLb = -changeLb;
-    let details = `Weight lost since last visit: ${fmt(weightLossKg,1)}kg (${fmt(weightLossLb,1)}lbs)<br>`;
+    let details = '';
+    if (isGain) {
+      details = `Gain of ${fmt(Math.abs(weightLossKg),1)}kg (${fmt(Math.abs(weightLossLb),1)}lbs) since last visit<br>`;
+    } else {
+      details = `Weight lost since last visit: ${fmt(weightLossKg,1)}kg (${fmt(weightLossLb,1)}lbs)<br>`;
+    }
     if (hasDate) {
-      details += `Average weight loss per week since last visit: ${fmt(-avgLb,1)}lbs/wk<br>`;
+      if (isGain) {
+        details += `Average gain since last visit: ${fmt(Math.abs(avgLb),1)}lbs/wk<br>`;
+      } else {
+        details += `Average weight loss per week since last visit: ${fmt(-avgLb,1)}lbs/wk<br>`;
+      }
     }
     details += `Total body weight lost: ${fmt(totalLostKg,1)}kg (${fmt(totalLostLb,1)}lbs)`;
     if (surgeryLostKg !== null) {
